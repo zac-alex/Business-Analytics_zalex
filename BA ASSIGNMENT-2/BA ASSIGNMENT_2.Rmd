@@ -1,0 +1,193 @@
+---
+title: "BA ASSIGNMENT 2"
+author: "Zachariah Alex"
+date: "2022-10-29"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#Loading Library Functions
+
+library(dplyr)
+
+```
+
+```{r}
+#Reading data from CSV file
+
+data1<-read.csv("Online_Retail.csv")
+
+head(data1)
+```
+
+```{r}
+# 1- Breakdown of the number of transactions by countries
+
+data2<-data1%>%group_by(Country)%>%count()%>%mutate(percent=n/nrow(data1)*100)%>%filter(percent>1)
+head(data2)
+```
+
+```{r}
+#2- Creating a new variable ‘TransactionValue’
+
+data1$TransactionValue<-c(data1$Quantity*data1$UnitPrice)
+head(data1)
+```
+
+```{r}
+#3- Breakdown of transaction values by countries exceeding 13000 pounds
+
+data3<-data1%>%group_by(Country)%>% summarize(x = sum(TransactionValue)) %>%filter(x>13000)
+head(data3)
+
+```
+
+```{r}
+#4 -Golden Question
+data1_new<-data1
+Temp=strptime(data1$InvoiceDate,format='%m/%d/%Y %H:%M',tz='GMT')
+head(Temp)
+
+#New invoice date
+
+data1_new$New_Invoice_Date<- as.Date(Temp)
+
+data1_new$New_Invoice_Date[20000]-data1_new$New_Invoice_Date[10]
+
+#separating date, day of the week and hour components 
+
+#converting dates to days
+
+data1_new$Invoice_Day_Week= weekdays(data1_new$New_Invoice_Date)
+
+#Invoice Hour to numeric
+
+data1_new$New_Invoice_Hour = as.numeric(format(Temp, "%H"))
+
+#Invoice Month to numeric
+
+data1_new$New_Invoice_Month = as.numeric(format(Temp, "%m"))
+
+#4(a) The percentage of transactions (by numbers) by days of the week
+
+percent<-data1_new %>% group_by(Invoice_Day_Week) %>% summarise(count=n()) %>% mutate(x=(count/sum(count))*100)
+
+head(percent)
+
+#4(b) The percentage of transactions (by transaction volume) by days of the week 
+
+percent_week<-data1_new%>% group_by(Invoice_Day_Week) %>%summarise(Value=sum(TransactionValue)) %>% mutate(x= (Value/sum(Value))*100)
+head(percent_week)
+
+#4(c) The percentage of transactions (by transaction volume) by month of the year
+
+percent_month<-data1_new %>% group_by(New_Invoice_Month) %>% summarise(Value=sum(TransactionValue)) %>% mutate(x= (Value/sum(Value))*100)
+head(percent_month)
+
+
+#4(d) The date with the highest number of transactions from Australia
+
+tran_date<-data1_new%>% filter(Country == 'Australia') %>% group_by(New_Invoice_Date) %>% summarise(count=n())%>% arrange(desc(count))
+
+head(tran_date)
+
+#Highest number of transactions were on 15/06/2011
+
+```
+
+```{r}
+
+#5- Plotting the histogram of transaction values from Germany 
+Germany<-data1%>%group_by(Country)%>%filter(Country=="Germany")
+hist(Germany$TransactionValue)
+```
+
+```{r}
+
+#6- Customer having the highest number of transactions and  most valuable customer
+
+data4<-data1%>%group_by(CustomerID)%>%summarise(ct=n())%>%arrange(desc(ct))
+head(data4)
+
+```
+
+```{r}
+#Customer 17841 is having the highest number of transactions
+
+data1%>%group_by(CustomerID)%>%summarise(y=sum(TransactionValue))%>%arrange(desc(y))
+
+#The most valuable customer is 14646
+
+
+#7- Percentage of missing values for each variable in the dataset
+
+data1%>%is.na()%>%colMeans()*100
+
+#Only customer ID Coloumn are missing values with a total of 24.92669%
+```
+
+```{r}
+#8 -Number of transactions with missing customer id by countries
+
+data4<-data1%>%filter(is.na(CustomerID))%>%group_by(Country)%>%count()
+head(data4)
+
+```
+
+```{r}
+#9 -The average number of days between consecutive shopping
+
+ndays<-data1_new%>% select(CustomerID,New_Invoice_Date) %>% group_by(CustomerID) %>% distinct(New_Invoice_Date) %>% arrange(desc(CustomerID)) %>% mutate(days = New_Invoice_Date-lag(New_Invoice_Date)) %>% filter(!is.na(days)) 
+head(ndays)
+
+#Finding average number of days
+
+mean(ndays$days)
+
+
+```
+
+```{r}
+
+#10 - The return rate for the French customers
+
+total<-data1%>%filter(Country=="France")%>%count()
+
+
+cancelled<-data1%>%filter(Country=="France" & Quantity<0)%>% summarize(count = n())
+
+
+returnRate = (cancelled/total)*100
+
+View(returnRate) 
+
+#The return rate for French Customers= 1.741264
+
+```
+
+```{r}
+
+#11 - The product that has generated the highest revenue for the retailer
+
+revenue<-data1%>%group_by(StockCode)%>%summarise(x=sum(TransactionValue))%>%arrange(desc(x))
+
+head(revenue)
+
+#DOTCOM POSTAGE with Stockcode DOT has generated the highest revenue for the retailer
+
+```
+
+```{r}
+#12 - Number of unique customers represented in the dataset
+
+unique(data1$CustomerID)%>%length()
+
+#Number of unique customers represented in the dataset =4373
+
+```
