@@ -1,0 +1,169 @@
+---
+title: "BA ASSIGNMENT 3"
+author: "Zachariah Alex"
+date: "2022-11-11"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+*loading library functions*
+```{r}
+library(mlbench) 
+
+```
+
+**1**
+
+```{r}
+set.seed(2017) 
+
+X=runif(100)*10 
+
+Y=X*4+3.45 
+
+Y=rnorm(100)*0.29 * Y+Y 
+
+```
+\textcolor{blue}{a)Plotting Y against X}
+
+```{r}
+plot(X,Y)
+
+```
+
+**Yes we can fit a linear model to explain Y based on X.In the above given equation 3.45 is the y intercept and for each values of x determines value for y.Moreover this equation is in the form of y=mx+c which is the equation for a straight line.**
+
+
+
+\textcolor{blue}{Constructing linear model}
+
+```{r}
+linear_model<-lm(Y~X)
+
+summary(linear_model)
+
+```
+$$Equation - Y=X*3.6108+ 4.4655$$
+
+
+**Accuracy or strength of model is given by the value of R-squared which is equal to 65.17%**
+
+
+\textcolor{blue}{Coefficient of determination R-squared is the square of correlation coefficient of X and Y.}
+
+
+*Coefficient of Determination= (Correlation Coefficient)2*
+
+```{r}
+
+correlation<-cor(X,Y)
+
+correlation
+```
+
+**From plotting we get to the understanding that this linear model has a positive slope which gives the idea that the value of r is positive or X and Y has a positive correlation of 0.80729 ie. if X increases Y also increases.**
+
+
+
+
+**The summary function gives coefficient of determination or R -squared and by calculating the square root of this value gives the value for r or correlation coefficient.The sign of r can be determined by the slope of the graph.**
+
+
+**2 **
+
+
+head(mtcars)
+
+
+\textcolor{blue}{Constructing linear model with weight and horsepower according to James}
+
+```{r}
+
+lm1<-lm(mtcars$hp~mtcars$wt,data=mtcars)
+
+summary(lm1)
+```
+
+**We can see that 43.39 % of variability of horse power is accounted by the weight of the car.**
+
+
+
+\textcolor{blue}{Constructing linear model with miles per gallon and horsepower according to Chris.}
+
+```{r}
+
+lm2<-lm(mtcars$hp~mtcars$mpg)
+
+summary(lm2)
+```
+
+**We can see that 60.24 % of variability of horse power is accounted by the mpg of the car.**
+
+\textcolor{blue}{From the above two values of R-squared we can say that Mile Per Gallon (mpg)is a better estimator of the (hp).}
+
+
+\textcolor{blue}{b) Constructing linear model with the number of cylinders (cyl) and the mile per gallon (mpg) values of a car to predict the car Horse Power (hp)}
+
+```{r}
+
+lm3<-lm(hp~cyl+mpg,data=mtcars)
+
+summary(lm3)
+
+HP<-predict(lm3,data.frame(cyl=c(4),mpg=c(22)))
+
+HP
+```
+
+*Equation -    HP= 54.067+23.979xcyl -2.775xmpg*
+
+
+*the estimated Horse Power of a car with 4 cylinder and mpg of 22 = 54.067+23.979x4 -2.775x22= 88.93 J*
+
+**3**
+```{r}
+data(BostonHousing) 
+
+head(BostonHousing)
+
+lm4<-lm(BostonHousing$medv~BostonHousing$crim+BostonHousing$zn+BostonHousing$ptratio+BostonHousing$chas)
+
+summary(lm4)
+```
+
+**A) R-squared = 0.3599 which means the model is only 35.99% accurate**
+
+
+
+**Bi) The coefficient of the chas variable is 4.58393 therefore we can come to the conclusion that if two houses that are identical in all aspects but one bounds the Chas River  and the other does not.The one which  bounds the chas river will be more expensive  by 4.58 times the other.**
+
+
+
+**B ii) Here from summary function we can see that the coefficient for pt ratio variable is -1.49367 so when this is applied to form a linear equation the house with high pt value will be less expensive.Here in our case house with pt ratio 18 will be less expensive than house with pt ratio 15**
+
+
+**C) p values for each attributes (crim,zn,ptratio,chas1) is too small or less than 5%.P values less than 5 % is considered statistically important.Here in our case all the 4 attributes are statistically important**
+
+
+**D)**
+```{r}
+anova(lm4)
+```
+
+**Here sum of squares in anova function gives the total variation between the group means and the overall mean.Therefore order of importance of these four variables will be in the order of sum of squares of variables in descending order.**
+
+
+\textcolor{blue}{The order is as follows: 1 :crime rate }
+
+\textcolor{blue}{                         2:pupil-teacher ratio}
+
+\textcolor{blue}{                         3:land zoned}
+
+\textcolor{blue}{                         4:bounds chas river}
+
